@@ -12,6 +12,7 @@ import EventAlerts from './components/EventAlerts';
 import QuickActions from './components/QuickActions';
 import Reservations from './components/Reservations';
 import Events from './components/EventAlerts';
+import SettingsPage from './components/Settings';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="settings" element={<SettingsPage />} />
 
         {/* Protected routes with nested routing */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
