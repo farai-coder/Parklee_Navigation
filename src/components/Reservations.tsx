@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Calendar, MapPin, Car, Trash2, Edit, Plus, X } from 'lucide-react';
 import { useAuth } from '../authentication/AuthProvider';
+import { BASE_URL } from '../api';
 
 interface Reservation {
     id: string;
@@ -71,7 +72,7 @@ const NewReservationModal: React.FC<NewReservationModalProps> = ({
         setError('');
 
         try {
-            const response = await fetch('http://localhost:8000/reservations/reserve-spot', {
+            const response = await fetch(`${BASE_URL}/reservations/reserve-spot`, {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
@@ -221,13 +222,13 @@ const Reservations: React.FC = () => {
         const fetchData = async () => {
             try {
                 const [reservationsRes, emptySpotsRes, eventsRes] = await Promise.all([
-                    fetch(`http://localhost:8000/reservations/reservations/details/${userId}`, {
+                    fetch(`${BASE_URL}/reservations/reservations/details/${userId}`, {
                         headers: { 'accept': 'application/json' }
                     }),
-                    fetch('http://localhost:8000/spots/empty-spots', {
+                    fetch(`${BASE_URL}/spots/empty-spots`, {
                         headers: { 'accept': 'application/json' }
                     }),
-                    fetch('http://localhost:8000/events/', {
+                    fetch(`${BASE_URL}/events/`, {
                         headers: { 'accept': 'application/json' }
                     })
                 ]);

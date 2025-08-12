@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import { useAuth } from './AuthProvider';
+import { BASE_URL } from '../api';
 
 type FormData = {
   email: string;
@@ -26,7 +27,7 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/auth/login', {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../api';
 
 interface FormData {
   email: string;
@@ -64,7 +65,7 @@ const SignUp: React.FC = () => {
     setApiError('');
 
     try {
-      const userResponse = await fetch('http://localhost:8000/users/', {
+      const userResponse = await fetch(`${BASE_URL}/users/`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -90,7 +91,7 @@ const SignUp: React.FC = () => {
       const userId = userData.user_id || userData.id;
       if (!userId) throw new Error('User ID not found');
 
-      const passwordResponse = await fetch('http://localhost:8000/auth/set-password', {
+      const passwordResponse = await fetch(`${BASE_URL}/auth/set-password`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -107,8 +108,8 @@ const SignUp: React.FC = () => {
         throw new Error(errorData.detail || errorData.message || 'Password setup failed');
       }
 
-      alert('Account created successfully! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 1500);
+      //alert('Account created successfully! Redirecting to login...');
+      setTimeout(() => navigate('/login'), 500);
     } catch (error) {
       setApiError(error instanceof Error ? error.message : 'Registration failed');
     } finally {

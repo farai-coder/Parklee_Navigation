@@ -15,6 +15,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../authentication/AuthProvider';
+import { BASE_URL } from '../api';
 
 interface Event {
   id: string;
@@ -44,7 +45,7 @@ const Events: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('http://localhost:8000/events/', {
+        const response = await fetch(`${BASE_URL}/events/`, {
           method: 'GET',
           headers: {
             'accept': 'application/json'

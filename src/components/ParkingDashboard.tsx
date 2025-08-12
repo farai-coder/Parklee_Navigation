@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, MapPin, Users, Calendar, ParkingCircle, CarFront, Gauge, Mic, Search, ChevronDown, Clock } from 'lucide-react';
 import Button from './ui/button';
 import { useAuth } from '../authentication/AuthProvider';
+import { BASE_URL } from '../api';
 
 // --- Global type declarations to fix TypeScript errors ---
 declare global {
@@ -91,10 +92,10 @@ const ParkingDashboard: React.FC = () => {
   const fetchData = async () => {
     try {
       const [eventsRes, zonesRes, emptySpotsRes, reservationsRes] = await Promise.all([
-        fetch('http://localhost:8000/events/'),
-        fetch('http://localhost:8000/spots/zones_with_occupancy'),
-        fetch('http://localhost:8000/spots/empty-spots'),
-        fetch('http://localhost:8000/reservations/details'),
+        fetch(`${BASE_URL}/events/`),
+        fetch(`${BASE_URL}/spots/zones_with_occupancy`),
+        fetch(`${BASE_URL}/spots/empty-spots`),
+        fetch(`${BASE_URL}/reservations/details`),
       ]);
 
       const eventsData: ApiEvent[] = await eventsRes.json();
@@ -107,8 +108,14 @@ const ParkingDashboard: React.FC = () => {
       setAllZones(zonesData); // Store all zones in a new state variable
       setAvailableZones(zonesData); // Initially, show all zones
       setEmptySpots(emptySpotsData);
+
       if (userId) {
-        setReservations(reservationsData.filter(res => res.user_id === userId));
+        const filteredReservations = reservationsData
+          .filter(res => res.user_id === userId)
+          .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+          .slice(0, 2);
+
+        setReservations(filteredReservations);
       } else {
         setReservations([]);
       }
@@ -117,6 +124,7 @@ const ParkingDashboard: React.FC = () => {
       setMessage({ text: "Failed to fetch data from the server.", type: 'error' });
     }
   };
+
 
   useEffect(() => {
     if (userId && role !== 'guest') {
@@ -148,7 +156,7 @@ const ParkingDashboard: React.FC = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/reservations/reserve-spot', {
+      const response = await fetch(`${BASE_URL}/reservations/reserve-spot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { BASE_URL } from '../api';
 
 
 // Replace with your actual Mapbox access token
@@ -197,7 +198,7 @@ const ParkingMap: React.FC = () => {
     mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
 
-    fetch('http://localhost:8000/spots/zones/')
+    fetch(`${BASE_URL}/spots/zones/`)
       .then(res => res.json())
       .then((data: ApiParkingZone[]) => {
         const zones = data.filter(z => z.logitude !== null).map(z => ({

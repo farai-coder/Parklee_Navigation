@@ -4,6 +4,7 @@ import NavigationHeader from '../../components/NavigationHeader'; // Your existi
 import { Car, MapPin, Calendar, CalendarCheck, CalendarDays } from 'lucide-react';
 import { useAuth } from '../../authentication/AuthProvider';
 import mapboxgl from 'mapbox-gl';
+import { BASE_URL } from '../../api';
 
 const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Car, path: '/dashboard/dashboard' },
@@ -40,7 +41,7 @@ const Dashboard: React.FC = () => {
                 setLoading(true);
 
                 // Fetch available spots
-                const spotsResponse = await fetch('http://localhost:8000/analytics/spots/unoccupied_count', {
+                const spotsResponse = await fetch(`${BASE_URL}/analytics/spots/unoccupied_count`, {
                     headers: {
                         'accept': 'application/json'
                     }
@@ -48,7 +49,7 @@ const Dashboard: React.FC = () => {
                 const spotsCount = await spotsResponse.json();
 
                 // Fetch zones count
-                const zonesResponse = await fetch('http://localhost:8000/analytics/zones_count', {
+                const zonesResponse = await fetch(`${BASE_URL}/analytics/zones_count`, {
                     headers: {
                         'accept': 'application/json'
                     }
@@ -56,7 +57,7 @@ const Dashboard: React.FC = () => {
                 const zonesCount = await zonesResponse.json();
 
                 // Fetch events count
-                const eventsResponse = await fetch('http://localhost:8000/analytics/api/analytics/events/count', {
+                const eventsResponse = await fetch(`${BASE_URL}/analytics/api/analytics/events/count`, {
                     headers: {
                         'accept': 'application/json'
                     }
