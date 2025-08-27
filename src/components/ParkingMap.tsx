@@ -4,9 +4,11 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { BASE_URL } from '../api';
 
 
+
 // Replace with your actual Mapbox access token
 const MAPBOX_ACCESS_TOKEN =
   "pk.eyJ1IjoiZmFyYWlyYXRvIiwiYSI6ImNtZTRyNW1nZTBiZmkyaXNhdmxxeXI2aWgifQ.PyorjUh2CoYpflZGj9xPeg";
+
 
 
 const containerStyle = {
@@ -15,7 +17,9 @@ const containerStyle = {
 };
 
 
+
 const defaultCenter = { lng: 31.047974, lat: -17.784655 };
+
 
 
 interface ApiParkingZone {
@@ -27,11 +31,13 @@ interface ApiParkingZone {
 }
 
 
+
 interface ParkingZone {
   id: string;
   name: string;
   position: { lng: number; lat: number };
 }
+
 
 
 type RouteStep = {
@@ -45,11 +51,13 @@ type RouteStep = {
 };
 
 
+
 const ParkingMap: React.FC = () => {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+
 
 
   const [userPosition, setUserPosition] = useState<{ lng: number; lat: number } | null>(null);
@@ -62,33 +70,23 @@ const ParkingMap: React.FC = () => {
   const [travelMode, setTravelMode] = useState<'driving' | 'walking'>('driving');
 
 
+
   const speakDirections = (steps: RouteStep[]) => {
     if (!('speechSynthesis' in window)) {
       console.warn('SpeechSynthesis not supported by this browser.');
       return;
     }
+    if (steps.length === 0) return;
+
     const synth = window.speechSynthesis;
     synth.cancel();
 
-
-    let index = 0;
-
-
-    const speakNext = () => {
-      if (index >= steps.length) return;
-      const step = steps[index];
-      const utterance = new SpeechSynthesisUtterance(step.maneuver.instruction);
-      utterance.rate = 1;
-      utterance.onend = () => {
-        index++;
-        speakNext();
-      };
-      synth.speak(utterance);
-    };
-
-
-    speakNext();
+    const step = steps[0];
+    const utterance = new SpeechSynthesisUtterance(step.maneuver.instruction);
+    utterance.rate = 1;
+    synth.speak(utterance);
   };
+
 
 
   const getRoute = async (
@@ -103,12 +101,15 @@ const ParkingMap: React.FC = () => {
       const json = await response.json();
 
 
+
       if (!json.routes || json.routes.length === 0) return null;
+
 
 
       const steps = json.routes[0].legs[0]?.steps || [];
       const data = json.routes[0];
       const route = data.geometry.coordinates;
+
 
 
       const geojson: GeoJSON.FeatureCollection = {
@@ -122,6 +123,7 @@ const ParkingMap: React.FC = () => {
           },
         }],
       };
+
 
 
       if (mapRef.current?.getLayer('route')) {
@@ -147,8 +149,10 @@ const ParkingMap: React.FC = () => {
       }
 
 
+
       const distanceKm = (data.distance / 1000).toFixed(1);
       const durationMins = (data.duration / 60).toFixed(0);
+
 
 
       return { distance: `${distanceKm} km`, duration: `${durationMins} mins`, steps };
@@ -159,15 +163,19 @@ const ParkingMap: React.FC = () => {
   };
 
 
+
   useEffect(() => {
     if (!mapContainerRef.current) return;
+
 
 
     mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
 
+
     const storedZone = localStorage.getItem('selectedZone');
     let destinationZone: ParkingZone | null = null;
+
 
 
     if (storedZone) {
@@ -183,8 +191,10 @@ const ParkingMap: React.FC = () => {
     }
 
 
+
     const initialCenter = destinationZone ? [destinationZone.position.lng, destinationZone.position.lat] : [defaultCenter.lng, defaultCenter.lat];
     const initialZoom = 15;
+
 
 
     mapRef.current = new mapboxgl.Map({
@@ -195,7 +205,9 @@ const ParkingMap: React.FC = () => {
     });
 
 
+
     mapRef.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
 
 
     fetch(`${BASE_URL}/spots/zones/`)
@@ -212,6 +224,7 @@ const ParkingMap: React.FC = () => {
       .catch(error => {
         console.error("Failed to fetch parking zones:", error);
       });
+
 
 
     if (navigator.geolocation) {
@@ -237,11 +250,13 @@ const ParkingMap: React.FC = () => {
     }
 
 
+
     return () => {
       if (mapRef.current) mapRef.current.remove();
       window.speechSynthesis.cancel();
     };
   }, []);
+
 
 
   useEffect(() => {
@@ -266,8 +281,10 @@ const ParkingMap: React.FC = () => {
     };
 
 
+
     updateRoute();
   }, [selectedZone, userPosition, travelMode]);
+
 
 
   useEffect(() => {
@@ -275,6 +292,7 @@ const ParkingMap: React.FC = () => {
       speakDirections(routeSteps);
     }
   }, [routeSteps]);
+
 
 
   const addUserMarker = (lng: number, lat: number, isFallback: boolean) => {
@@ -288,17 +306,19 @@ const ParkingMap: React.FC = () => {
     });
 
 
+
     const el = document.createElement('div');
     el.id = 'user-marker';
     el.className = 'user-marker';
     el.title = isFallback ? 'Your location (default)' : 'Your location';
     el.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10" fill="#3b82f6" opacity="0.3"/>
-        <circle cx="12" cy="12" r="6" fill="#3b82f6" />
-        <circle cx="12" cy="12" r="3" fill="white" />
-      </svg>
-    `;
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" fill="#3b82f6" opacity="0.3"/>
+        <circle cx="12" cy="12" r="6" fill="#3b82f6" />
+        <circle cx="12" cy="12" r="3" fill="white" />
+      </svg>
+    `;
+
 
 
     const marker = new mapboxgl.Marker({ element: el }).setLngLat([lng, lat]).addTo(mapRef.current);
@@ -306,8 +326,10 @@ const ParkingMap: React.FC = () => {
   };
 
 
+
   const addZoneMarker = (zone: ParkingZone) => {
     if (!mapRef.current) return;
+
 
 
     const markerContainer = document.createElement('div');
@@ -316,13 +338,15 @@ const ParkingMap: React.FC = () => {
     markerContainer.style.cursor = 'pointer';
 
 
+
     const iconEl = document.createElement('div');
     iconEl.className = 'marker-icon';
     iconEl.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-      </svg>
-    `;
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+      </svg>
+    `;
+
 
 
     const nameEl = document.createElement('div');
@@ -330,8 +354,10 @@ const ParkingMap: React.FC = () => {
     nameEl.textContent = zone.name;
 
 
+
     markerContainer.appendChild(iconEl);
     markerContainer.appendChild(nameEl);
+
 
 
     const marker = new mapboxgl.Marker({
@@ -342,14 +368,17 @@ const ParkingMap: React.FC = () => {
       .addTo(mapRef.current);
 
 
+
     markerContainer.addEventListener('click', () => handleZoneClick(zone));
     markersRef.current.push(marker);
   };
 
 
+
   const handleZoneClick = (zone: ParkingZone) => {
     setSelectedZone(zone);
     setCountdown(10);
+
 
 
     if (popupRef.current) {
@@ -358,14 +387,17 @@ const ParkingMap: React.FC = () => {
     if (!mapRef.current) return;
 
 
+
     const popupContent = document.createElement('div');
     popupContent.className = 'space-y-2';
+
 
 
     const title = document.createElement('h2');
     title.className = 'font-semibold text-gray-800';
     title.textContent = zone.name;
     popupContent.appendChild(title);
+
 
 
     // Route info will be updated by the useEffect hook
@@ -375,10 +407,12 @@ const ParkingMap: React.FC = () => {
     popupContent.appendChild(distanceEl);
 
 
+
     const durationEl = document.createElement('p');
     durationEl.className = 'text-sm text-gray-600';
     durationEl.id = 'popup-duration';
     popupContent.appendChild(durationEl);
+
 
 
     if (userPosition) {
@@ -392,15 +426,18 @@ const ParkingMap: React.FC = () => {
     }
 
 
+
     const countdownEl = document.createElement('p');
     countdownEl.className = 'text-xs text-gray-600';
     popupContent.appendChild(countdownEl);
+
 
 
     popupRef.current = new mapboxgl.Popup({ offset: 25 })
       .setLngLat([zone.position.lng, zone.position.lat])
       .setDOMContent(popupContent)
       .addTo(mapRef.current);
+
 
 
     const countdownInterval = setInterval(() => {
@@ -413,12 +450,14 @@ const ParkingMap: React.FC = () => {
     }, 500);
 
 
+
     popupRef.current.on('close', () => {
       setSelectedZone(null);
       setCountdown(null);
       clearInterval(countdownInterval);
     });
   };
+
 
 
   useEffect(() => {
@@ -438,6 +477,7 @@ const ParkingMap: React.FC = () => {
   }, [selectedZone]);
 
 
+
   return (
     <div className="relative">
       {locationStatus === 'loading' && (
@@ -445,6 +485,7 @@ const ParkingMap: React.FC = () => {
           Fetching your location...
         </div>
       )}
+
 
 
       {/* Beautiful ETA and Distance overlay at top of map */}
@@ -465,40 +506,43 @@ const ParkingMap: React.FC = () => {
       )}
 
 
+
       <div style={containerStyle} ref={mapContainerRef} />
+
 
 
       {/* Marker styles */}
       <style>{`
-        .user-marker svg {
-          filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
-          width: 32px;
-          height: 32px;
-          cursor: pointer;
-        }
-        .marker-icon svg {
-          cursor: pointer;
-          filter: drop-shadow(0 0 3px rgba(0,0,0,0.4));
-          width: 32px;
-          height: 32px;
-          color: #2563EB;
-        }
-        .zone-name-label {
-          background-color: white;
-          color: #1e40af;
-          font-size: 12px;
-          font-weight: 600;
-          padding: 2px 6px;
-          border-radius: 9999px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-          border: 1px solid #93c5fd;
-          margin-top: 4px;
-          white-space: nowrap;
-        }
-      `}</style>
+        .user-marker svg {
+          filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
+          width: 32px;
+          height: 32px;
+          cursor: pointer;
+        }
+        .marker-icon svg {
+          cursor: pointer;
+          filter: drop-shadow(0 0 3px rgba(0,0,0,0.4));
+          width: 32px;
+          height: 32px;
+          color: #2563EB;
+        }
+        .zone-name-label {
+          background-color: white;
+          color: #1e40af;
+          font-size: 12px;
+          font-weight: 600;
+          padding: 2px 6px;
+          border-radius: 9999px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          border: 1px solid #93c5fd;
+          margin-top: 4px;
+          white-space: nowrap;
+        }
+      `}</style>
     </div>
   );
 };
+
 
 
 export default ParkingMap;
